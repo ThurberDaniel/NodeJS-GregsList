@@ -1,41 +1,60 @@
 import BaseController from "../utils/BaseController";
-import { carsService } from "../services/CarService";
+import { carsService } from "../services/CarsService";
 
 export class CarsController extends BaseController {
   constructor() {
     super("/cars");
     this.router
       .get("/", this.getAll)
-      .post("", this.create);
+      .get("/:id/", this.getById)
+      .post("", this.create)
+      .put("/:id", this.edit)
+      .delete("/:id", this.delete)
+
+  }
+  async getAll(request, respond, next) {
+    try {
+      let data = await carsService.getAll(request.query)
+      return respond.send(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getById(request, respond, next){
+    try {
+      let data = await carsService.getById(request.params.id)
+      return respond.send(data)
+    } catch (error) {
+      next(error)
+    }
   }
 
-  /**
-   * Sends found values to a client by request
-   * @param {import("express").Request} req 
-   * @param {import("express").Response} res 
-   * @param {import("express").NextFunction} next 
-   */
-  async getAll(req, res, next) {
+  async create(request, respond, next) {
     try {
-      const values = valuesService.find()
-      return res.send(values);
+      let data = carsService.create(request.body)
+      respond.send(data);
     } catch (error) {
       next(error);
     }
   }
 
-  /**
-   * Creates a value from request body and returns it
-   * @param {import("express").Request} req 
-   * @param {import("express").Response} res 
-   * @param {import("express").NextFunction} next 
-   */
-  async create(req, res, next) {
+  async edit(request, respond, next){
     try {
-      const value = valuesService.create(req.body)
-      res.send(value);
+    request.body.id  = request.params.id
+    let data = await carsService.edit(request.body)
+    return respond.send(data)
     } catch (error) {
-      next(error);
+      next(error)
     }
   }
+
+async delete(request,respond, next){
+  try {
+    let data = await carsService.delete(request.params.id)
+    return respond.send(data)
+  } catch (error) {
+    next(error)
+  }
+}
+
 }
